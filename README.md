@@ -106,7 +106,7 @@ let g:vimaid_close_modal_mapping = '<C-a>'
 nnoremap <C-a> :Aid<CR>
 ```
 
-This mapping allows you to use `Ctrl + A` to quickly close the modal and return to your normal workflow, avoiding the default key sequence.
+These two mappings allows you to use `Ctrl + a` to quickly open and close the modal (without loosing your chat history) and return to your normal workflow, avoiding the default key sequence.
 
 You can replace `<C-a>` with any key combination of your choice to suit your preferences.
 
