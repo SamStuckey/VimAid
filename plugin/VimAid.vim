@@ -32,7 +32,7 @@ function! VimAidModal()
   let l:current_dir = getcwd()
   let l:session_name = substitute(l:current_dir, '^/', '', '')  " Remove leading slash if any
   let l:session_name = substitute(l:session_name, '/', '-', 'g') " Replace slashes with dashesid
-  let l:filepath = expand('%:t')
+  let l:filepath = expand('%:p')
 
   " Create a buffer buffer unless it already exists
   if !exists('g:buf') || !bufexists(g:buf)
