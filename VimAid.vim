@@ -1,6 +1,6 @@
-function! VimAid()
-  if !exists('g:vimaid_model_mapping')
-    let g:vimaid_model_mapping = '<C-a>'
+function! VimAidModal()
+  if !exists('g:vimaid_close_modal_mapping')
+    let g:vimaid_close_modal_mapping = '<C-a>'
   endif
   let width = 80 " Set width of the modal
   let height = 24 " Set height of the modal
@@ -63,6 +63,6 @@ function! VimAid()
   call system("tmux send-keys -t " . l:session_name . " C-l")
 
   " map close shortcut to buffer
-  execute 'tnoremap <buffer>' g:vimaid_model_mapping ' <C-\><C-n>:q<CR>'
+  execute 'tnoremap <buffer>' g:vimaid_close_modal_mapping ' <C-\><C-n>:q<CR>'
 endfunction
-command! Aid call VimAid()
+command! Aid call VimAidModal()
