@@ -58,7 +58,7 @@ Once you have these prerequisites installed and configured, you're ready to inst
     :PackerSync
     ```
 
-### Using Pathogen (Recommended)
+### Using Pathogen
 1. Navigate to your `bundle` directory:
 
     ```bash
