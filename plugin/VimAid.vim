@@ -85,7 +85,7 @@ function! VimAidModal()
   call system(l:prompt_cmd)
   " clear the spew from file load
   sleep 100m
-  call system("tmux send-keys -t " . l:session_name . " C-l")
+  call system("tmux send-keys -t " . l:session_name . "C-c C-l")
 
   " map close shortcut to buffer
   execute 'tnoremap <buffer>' g:vimaid_close_modal_mapping ' <C-\><C-n>:q<CR>'
