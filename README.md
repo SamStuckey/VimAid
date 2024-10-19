@@ -1,5 +1,7 @@
 # VimAid Plugin
 
+![5BD0607D-9922-42C7-B29E-0CC131ACB802_1_102_o](https://github.com/user-attachments/assets/a9458294-bd64-42ae-bc56-7e709e21764b)
+
 ## Overview
 VimAid is a lightweight Neovim plugin that opens a modal window connected to `aider-chat`, enabling you to ask questions directly about the file you're currently working on. Its goal is to streamline the process of querying and interacting with `aider-chat` for code assistance, without leaving your Neovim environment.
 
