@@ -20,87 +20,78 @@
 " OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 " THE SOFTWARE.
 
-function! VimAidModal()
+function! VimAidModal() abort
+  " Use a default value for the close modal mapping if it's not defined
+  let l:close_mapping = get(g:, 'vimaid_close_modal_mapping', '<C-a>')
 
-  if !exists('g:vimaid_close_modal_mapping')
-    let g:vimaid_close_modal_mapping = '<C-a>'
-  endif
-
-  let width = 100 " Set width of the modal
-  let height = 30 " Set height of the modal
+  " Set dimensions for the modal
+  let l:width = 100
+  let l:height = 30
 
   " Calculate the position to center the modal
-  let editor_width = nvim_list_uis()[0].width
-  let editor_height = nvim_list_uis()[0].height
-  let row = (editor_height - height) / 2
-  let col = (editor_width - width) / 2
+  let l:ui = nvim_list_uis()[0]
+  let l:row = (l:ui.height - l:height) / 2
+  let l:col = (l:ui.width - l:width) / 2
 
+  " Set up session and file paths
   let l:current_dir = getcwd()
-  let l:session_name = substitute(l:current_dir, '^/', '', '')  " Remove leading slash if any
-  let l:session_name = substitute(l:session_name, '/', '-', 'g') " Replace slashes with dashesid
+  let l:session_name = substitute(l:current_dir, '^/', '', '')
+  let l:session_name = substitute(l:session_name, '/', '-', 'g')
   let l:filepath = expand('%:p')
+
+  " Window options for modal
   let l:style_opts = {
         \ 'relative': 'editor',
-        \ 'width': width,
-        \ 'height': height,
-        \ 'row': row,
-        \ 'col': col,
+        \ 'width': l:width,
+        \ 'height': l:height,
+        \ 'row': l:row,
+        \ 'col': l:col,
         \ 'style': 'minimal',
-        \ 'border': 'single',
+        \ 'border': 'single'
         \ }
 
-  " Create a buffer buffer unless it already exists
-  if !exists('g:buf') || !bufexists(g:buf)
-    echo "creating buffer"
-    " create buffer in new modal
-    " echo 'creating buffer'
-    let g:buf = nvim_create_buf(0, 1)
+  " Create a buffer unless it already exists
+  if !exists('g:vim_aid_buf') || !bufexists(g:vim_aid_buf)
+    let g:vim_aid_buf = nvim_create_buf(v:false, v:true)
 
-    let win = nvim_open_win(g:buf, 1, l:style_opts)
+    let l:win = nvim_open_win(g:vim_aid_buf, v:true, l:style_opts)
 
-    " Apply a transparent background to the modal window
-    highlight CustomModalBackground guibg=#1c1c1c "
-    highlight FloatBorder guibg=NONE guifg=#D3D3D3 "
-    call nvim_win_set_option(win, 'winhighlight', 'NormalFloat:Normal,FloatBorder:FloatBorder')
-    call nvim_win_set_option(win, 'winhighlight', 'Normal:CustomModalBackground')
+    " Set up custom highlighting
+    highlight CustomModalBackground guibg=#1c1c1c
+    highlight FloatBorder guibg=NONE guifg=#D3D3D3
+    call nvim_win_set_option(l:win, 'winhighlight', 'NormalFloat:CustomModalBackground,FloatBorder:FloatBorder')
 
-    setlocal scrollback=10000
+    " Set terminal settings
+    setlocal scrollback=10000 nonumber norelativenumber
     execute 'terminal'
-    setlocal nonumber norelativenumber
 
-    "" Headless set up of tmux and aider 
-    " Check if TMUX session is already running for filepath session
-    let l:session_exists = system('tmux has-session -t ' . l:session_name)
-    " Create TMUX session if it's not already running
+    " Check and start TMUX session if not already running
     if v:shell_error != 0
-        echo "Starting Tmux session: " . l:session_name
-        let l:start_session_cmd = "tmux new-session -d -s " . l:session_name
-        call system(l:start_session_cmd)
-        " Start Aider chat in TMUX session
-        call system("tmux send-keys -t " . l:session_name . " 'python3 -m aider' C-m")
+      let l:start_session_cmd = 'tmux new-session -d -s ' . l:session_name
+      call system(l:start_session_cmd)
+      call system('tmux send-keys -t ' . l:session_name . " 'python3 -m aider' C-m")
     endif
 
-    " Connect to TMUX in terminal buffer 
+    " Attach to TMUX session
+    call feedkeys('tmux attach -t ' . l:session_name . "\n")
     startinsert
-    call feedkeys("tmux attach -t " . l:session_name . "\n")
   else
-    " attach to the existing buffer
-    echo 'connecting to buffer'
-    let win = nvim_open_win(g:buf, 1, l:style_opts)
+    " Attach to existing buffer
+    let l:win = nvim_open_win(g:vim_aid_buf, v:true, l:style_opts)
     startinsert
   endif
 
-  " Add current file to aider session
-  let l:prompt_cmd = "tmux send-keys -t " . l:session_name . " '/add " . l:filepath . "' C-m"
-  call system(l:prompt_cmd)
-  " clear the spew from file load
-  call system("tmux send-keys -t " . l:session_name . " C-l")
+  " Add current file to Aider session and clear terminal clutter
+  let l:add_file_cmd = 'tmux send-keys -t ' . l:session_name . " '/add " . l:filepath . "' C-m"
+  call system(l:add_file_cmd)
+  call system('tmux send-keys -t ' . l:session_name . " C-l")
 
-  " map close shortcut to buffer
-  execute 'tnoremap <buffer>' g:vimaid_close_modal_mapping ' <C-\><C-n>:q<CR>'
+  " Map close modal shortcut
+  execute 'tnoremap <buffer>' l:close_mapping ' <C-\><C-n>:q<CR>'
 
-  " treat the aider / tmux as immutable within the modal
+  " Treat the aider / tmux session as immutable in the modal
   tnoremap <buffer> <C-c> <C-U><C-l>
   tnoremap <buffer> <C-d> <C-U><C-l>
 endfunction
+
 command! Aid call VimAidModal()
