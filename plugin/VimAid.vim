@@ -65,7 +65,9 @@ function! VimAidModal() abort
     setlocal scrollback=10000 nonumber norelativenumber
     execute 'terminal'
 
-    " Check and start TMUX session if not already running
+    "" Headless set up of tmux and aider
+    " Check if TMUX session is already running for filepath session
+    let l:session_exists = system('tmux has-session -t ' . l:session_name)
     if v:shell_error != 0
       let l:start_session_cmd = 'tmux new-session -d -s ' . l:session_name
       call system(l:start_session_cmd)
@@ -73,8 +75,8 @@ function! VimAidModal() abort
     endif
 
     " Attach to TMUX session
-    call feedkeys('tmux attach -t ' . l:session_name . "\n")
     startinsert
+    call feedkeys('tmux attach -t ' . l:session_name . "\n")
   else
     " Attach to existing buffer
     let l:win = nvim_open_win(g:vim_aid_buf, v:true, l:style_opts)
